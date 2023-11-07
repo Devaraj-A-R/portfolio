@@ -1,0 +1,209 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Personal Portfolio Website</title>
+    <link rel="stylesheet" href="style.css">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.5/font/bootstrap-icons.css">
+    <script src="https://kit.fontawesome.com/e674bba739.js" crossorigin="anonymous"></script>
+</head>
+
+<body>
+    <div id="header">
+        <div class="container">
+            <nav>
+                <h1 class="logo">Devaraj</h1>
+                <ul>
+                    <li><a href="#about">Home</a></li>
+                    <li><a href="#skills">Skills</a></li>
+                    <li><a href="#project">Project</a></li>
+                    <li><a href="#contact">Contact</a></li>
+                </ul>
+                <button><a href="https://www.linkedin.com/in/devaraj-a-r/" target="_blank">Hire Me</a></button>
+                <i class="fas fa-bars"></i>
+                <i class="fas fa-times" style="display: none;"></i>
+
+            </nav>
+
+        </div>
+    </div>
+    <!-- ----------ABOUT---------- -->
+    <div id="about">
+        <div class="container">
+            <div class="row">
+                <div class="about-col-1">
+                    <img src="images/photo.jpeg">
+                </div>
+                <div class="about-col-2">
+                    <div class="text1">
+                        <h1>Hi, I'm <span>Devaraj</span></h1>
+                        <p>Computer Science Graduate | 2023 <br>
+                            Open to new opportunities to work <br>
+                            Passionate about solving complex problems through innovative technology solutions.
+                        </p>
+                    </div>
+                    <div class="tab-titles">
+                        <p class="tab-links active-link" onclick="openTab('education')">Education</p>
+                        <p class="tab-links" onclick="openTab('internship')">Internship</p>
+                    </div>
+                    <div class="tab-contents active-tab" id="education">
+                        <ul>
+                            <li><span>2023</span><br>University B D T College Of Engineering - Davangere<br>CSE</li>
+                            <li><span>2018</span><br>Jawahar Navodaya Vidyalaya - Koppal<br>12th</li>
+                            <li><span>2016</span><br>Jawahar Navodaya Vidyalaya - Koppal<br>10th</li>
+                        </ul>
+                    </div>
+                    <div class="tab-contents" id="internship">
+                        <ul>
+                            <li><span>Sumukha Info Tech Davangere</span><br>
+                                Completed Two month internship at Sumukha Info Tech .Learned about Machine Learning and
+                                done some minor project using python programming language.</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <!-- ----------Skills---------- -->
+    <div id="skills">
+        <div class="container">
+            <h1 class="sub-title">My Skills</h1>
+            <div class="skills-list">
+                <div >
+                    <img width="144" height="144" src="https://img.icons8.com/fluency/144/java-coffee-cup-logo.png"
+                        alt="java-logo" />
+                        <h2>Core Java</h2>
+                        <p>Basics Of Java. <br>OOPS Concepts.</p>
+                   
+                </div>
+                <div>
+                    <img width="144" height="144" src="https://img.icons8.com/color/100/code.png"
+                        alt="web development" />
+                    <h2>Web Development</h2>
+                    <p>HTML. <br>CSS. <br>Java Script.</p>
+
+                </div>
+                <div>
+                    <!-- <i class="fa-solid fa-crop-simple"></i> -->
+                    <img width="144" height="144" src="https://img.icons8.com/color/144/python--v1.png"
+                        alt="python-logo" />
+                    <h2>Python</h2>
+                    <p>Basics of Python.</p>
+                </div>
+            </div>
+        </div>
+    </div>
+    <!-- ----------Projects--------- -->
+    <div id="project">
+        <div class="container">
+            <h1 class="sub-title">My Projects</h1>
+            <div class="project-list">
+                <div class="project">
+                    <img src="images/project 1.jpg" alt="">
+                    <div class="layer">
+                        <h2>IPL Runs Management System</h2>
+                        <p>This is a DBMS mini project built using HTML & CSS for frontend
+                           and PHP MYSQL for backend.The application features schedules,information about teams,records
+                           of batting and bowling,creating new schedules.The admin has all authorites to make changes for the database.</p>
+                        <!-- <a href="https://github.com/darshanmn2001/Online-Shopping-Management-System"><i
+                                class="fas fa-external-link-alt"></i></a> -->
+                    </div>
+                </div>
+                <div class="project">
+                    <img src="images/project 2.png" alt="">
+                    <div class="layer">
+                        <h2>Animation of Data Structure Concept Using Python</h2>
+                        <p>It's an interactive web application aimed at visualizing and animating various data
+                            structures. The primary objective was to provide a visually engaging and intuitive way for
+                            computer science students to grasp complex data structures.
+                        </p>
+                        <!-- <a href="http://darshanmn01.pythonanywhere.com/" target="_blank"><i class="fas fa-external-link-alt"></i></a> -->
+                    </div>
+                </div>
+                <div class="project">
+                    <img src="images/project 3.jpg" alt="">
+                    <div class="layer">
+                        <h2>Skin Cancer Prediction using Image Processing</h2>
+                        <p>In this project using machine learning (CNN) algorithm with the Image processing system it will predict the type of the skin cancer it
+                           contains.Using flask framework built fronted part.
+                        </p>
+                        <!-- <a href="https://github.com/darshanmn2001/Pneumonia-Prediction-System"><i class="fas fa-external-link-alt"></i></a> -->
+                    </div>
+                </div>
+            </div>
+            <a href="https://github.com/Devaraj-A-R" class="btn">See more</a>
+        </div>
+    </div>
+
+    <!-- ----------CONTACT---------- -->
+    <div id="contact">
+        <div class="container">
+            <div class="row">
+                <div class="contact-left">
+                    <h1 class="sub-title">Contact Me</h1>
+                    <p><a href="mailto:devrajar112233@gmail.com">
+                        <i class="fa-solid fa-envelope"></i>devrajar112233@gmail.com</a></p>
+                    <p><a href="tel:8105506467">
+                    <i class="fa-solid fa-phone"></i>8105506467</a></p>
+                    <div class="social-icons">                        
+                        <a href="https://github.com/Devaraj-A-R"><i class='fab fa-github'></i></a>
+                        <a href="https://twitter.com/DARSHAN30991355?t=Fikj00sJM0VowhKAOdeXmA&s=09"><i class="fab fa-twitter-square"></i></a>
+                        <a href="https://instagram.com/devaraj_a_r_17?utm_source=qr&igshid=MzNlNGNkZWQ4Mg%3D%3D"><i class="fab fa-instagram"></i></a>
+                        <a href="https://www.linkedin.com/in/devaraj-a-r/"><i class="fab fa-linkedin"></i></a>
+                    </div>
+                    <a href="images/Resume.pdf" download class="btn btn2">Download CV</a>
+                </div>
+                <div class="contact-right">
+                    <form action="mailto:devrajar112233@gmail.com">
+                        <input type="text" name="Name" placeholder="Your Name" required>
+                        <input type="email" name="Email" placeholder="Your Email" required>
+                        <textarea name="Message" rows="6" placeholder="Your Message"></textarea>
+                        <button type="submit" class="btn btn3">submit</button>
+                    </form>
+                </div>
+            </div>
+        </div>
+
+    </div>
+
+
+
+    <script>
+        var tabLinks = document.getElementsByClassName('tab-links');
+        var tabContents = document.getElementsByClassName('tab-contents');
+
+        function openTab(tabName) {
+            for (tabLink of tabLinks) {
+                tabLink.classList.remove('active-link');
+            }
+            for (tabContent of tabContents) {
+                tabContent.classList.remove('active-tab');
+            }
+            event.currentTarget.classList.add('active-link');
+            document.getElementById(tabName).classList.add('active-tab');
+        }
+
+
+        // JavaScript for handling the mobile navigation menu
+        document.querySelector('.fas.fa-bars').addEventListener('click', function () {
+            document.querySelector('nav ul').classList.toggle('show');
+            // Hide the hamburger icon and show the close icon
+            document.querySelector('.fas.fa-bars').style.display = 'none';
+            document.querySelector('.fas.fa-times').style.display = 'block';
+        });
+
+        document.querySelector('.fas.fa-times').addEventListener('click', function () {
+            document.querySelector('nav ul').classList.remove('show');
+            // Hide the close icon and show the hamburger icon
+            document.querySelector('.fas.fa-times').style.display = 'none';
+            document.querySelector('.fas.fa-bars').style.display = 'block';
+        });
+
+
+    </script>
+</body>
+
+</html>

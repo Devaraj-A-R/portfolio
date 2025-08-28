@@ -1,0 +1,400 @@
+SCRIPT1
+
+import bpy
+import os
+
+# ✅ Map file extensions to Blender add-ons and operators
+IMPORTERS = {
+    ".stl":  ("io_mesh_stl",   bpy.ops.import_mesh.stl),
+    ".fbx":  ("io_scene_fbx",  bpy.ops.import_scene.fbx),
+    ".obj":  ("io_scene_obj",  bpy.ops.import_scene.obj),
+    ".glb":  ("io_scene_gltf2", bpy.ops.import_scene.gltf),
+    ".gltf": ("io_scene_gltf2", bpy.ops.import_scene.gltf),
+}
+
+
+def ensure_addon_enabled(addon_name: str):
+    """Enable the required Blender add-on if it's not already enabled."""
+    if addon_name not in bpy.context.preferences.addons:
+        try:
+            bpy.ops.preferences.addon_enable(module=addon_name)
+            print(f"🔧 Enabled add-on: {addon_name}")
+        except Exception as e:
+            print(f"⚠️ Failed to enable add-on {addon_name}: {e}")
+
+
+def import_model(filepath):
+    """Import a model and return newly imported objects"""
+    ext = os.path.splitext(filepath)[1].lower()
+    if ext not in IMPORTERS:
+        print(f"❌ Unsupported File Format: {ext}")
+        return []
+
+    addon, operator = IMPORTERS[ext]
+
+    # ✅ ensure addon is enabled
+    ensure_addon_enabled(addon)
+
+    # Track before/after objects to detect new ones
+    before = set(bpy.data.objects)
+    operator(filepath=filepath)
+    after = set(bpy.data.objects)
+
+    new_objs = list(after - before)
+    return new_objs
+
+
+# Example usage
+if __name__ == "__main__":
+    # First model
+    model1_path = r"C:/Users/Devaraj/Downloads/sharks_underwater/scene.gltf"
+    import_model(model1_path)
+
+    # Second model (replace this path with your .stl file path)
+    model2_path = r"C:/Users/Devaraj/Documents/ROV/car_engine_stl/Car engine.stl"
+    imported_objs = import_model(model2_path)
+
+    if imported_objs:
+        # Move the second model to a specific location
+        imported_objs[0].location = (0, 5, 0)
+        print("✅ Imported second model:", imported_objs[0].name)
+
+
+
+SCRIPT2
+
+import bpy
+from bpy.types import Operator
+from bpy.props import FloatProperty
+
+
+class OBJECT_OT_MoveModelsModal(Operator):
+    bl_idname = "object.move_models_modal"
+    bl_label = "Move STL & Sketchfab Models with Keys"
+
+    step: FloatProperty(name="Move Step", default=0.2)
+    rot_step: FloatProperty(name="Rotate Step", default=0.1)  # radians
+    _timer = None
+    _keys_pressed = set()
+
+    def modal(self, context, event):
+        # ✅ Replace with your object names if needed
+        model1 = bpy.data.objects.get("Sketchfab_model")       # Sketchfab model
+        model2 = bpy.data.objects.get("Car engine")  # STL model
+
+        # Stop if no models
+        if not (model1 and model2):
+            self.report({'ERROR'}, "Models not found (check names in Outliner).")
+            return {'CANCELLED'}
+
+        # Exit
+        if event.type == 'ESC':
+            self.cancel(context)
+            return {'CANCELLED'}
+
+        # Track key press/release
+        if event.type in {'UP_ARROW', 'DOWN_ARROW', 'LEFT_ARROW', 'RIGHT_ARROW', 'PAGE_UP', 'PAGE_DOWN'}:
+            if event.value == 'PRESS':
+                self._keys_pressed.add(event.type)
+            elif event.value == 'RELEASE':
+                self._keys_pressed.discard(event.type)
+
+        # Apply actions on TIMER
+        if event.type == 'TIMER':
+            for key in list(self._keys_pressed):
+
+                # --- Ctrl+Shift = Move BOTH ---
+                if event.ctrl and event.shift:
+                    if key == 'UP_ARROW':
+                        model1.location.y += self.step
+                        model2.location.y += self.step
+                    elif key == 'DOWN_ARROW':
+                        model1.location.y -= self.step
+                        model2.location.y -= self.step
+                    elif key == 'LEFT_ARROW':
+                        model1.location.x -= self.step
+                        model2.location.x -= self.step
+                    elif key == 'RIGHT_ARROW':
+                        model1.location.x += self.step
+                        model2.location.x += self.step
+                    elif key == 'PAGE_UP':
+                        model1.location.z += self.step
+                        model2.location.z += self.step
+                    elif key == 'PAGE_DOWN':
+                        model1.location.z -= self.step
+                        model2.location.z -= self.step
+
+                # --- Ctrl only = Rotate STL ---
+                elif event.ctrl:
+                    if key == 'UP_ARROW':
+                        model2.rotation_euler.x += self.rot_step
+                    elif key == 'DOWN_ARROW':
+                        model2.rotation_euler.x -= self.rot_step
+                    elif key == 'LEFT_ARROW':
+                        model2.rotation_euler.z += self.rot_step
+                    elif key == 'RIGHT_ARROW':
+                        model2.rotation_euler.z -= self.rot_step
+                    elif key == 'PAGE_UP':
+                        model2.rotation_euler.y += self.rot_step
+                    elif key == 'PAGE_DOWN':
+                        model2.rotation_euler.y -= self.rot_step
+
+                # --- Shift only = Move Sketchfab model ---
+                elif event.shift:
+                    if key == 'UP_ARROW':
+                        model1.location.y += self.step
+                    elif key == 'DOWN_ARROW':
+                        model1.location.y -= self.step
+                    elif key == 'LEFT_ARROW':
+                        model1.location.x -= self.step
+                    elif key == 'RIGHT_ARROW':
+                        model1.location.x += self.step
+                    elif key == 'PAGE_UP':
+                        model1.location.z += self.step
+                    elif key == 'PAGE_DOWN':
+                        model1.location.z -= self.step
+
+                # --- No modifiers = Move STL ---
+                else:
+                    if key == 'UP_ARROW':
+                        model2.location.y += self.step
+                    elif key == 'DOWN_ARROW':
+                        model2.location.y -= self.step
+                    elif key == 'LEFT_ARROW':
+                        model2.location.x -= self.step
+                    elif key == 'RIGHT_ARROW':
+                        model2.location.x += self.step
+                    elif key == 'PAGE_UP':
+                        model2.location.z += self.step
+                    elif key == 'PAGE_DOWN':
+                        model2.location.z -= self.step
+
+        return {'RUNNING_MODAL'}
+
+    def invoke(self, context, event):
+        wm = context.window_manager
+        self._timer = wm.event_timer_add(0.1, window=context.window)
+        wm.modal_handler_add(self)
+        self._keys_pressed.clear()
+
+        self.report({'INFO'},
+                    "Arrows = STL | Shift+Arrows = Model1 | Ctrl+Arrows = Rotate STL | Shift+Ctrl+Arrows = Move Both")
+        return {'RUNNING_MODAL'}
+
+    def cancel(self, context):
+        wm = context.window_manager
+        if self._timer:
+            wm.event_timer_remove(self._timer)
+        self._keys_pressed.clear()
+
+
+def register():
+    bpy.utils.register_class(OBJECT_OT_MoveModelsModal)
+
+
+def unregister():
+    bpy.utils.unregister_class(OBJECT_OT_MoveModelsModal)
+
+
+if __name__ == "__main__":
+    register()
+    bpy.ops.object.move_models_modal('INVOKE_DEFAULT')
+
+
+
+--------------------------------------------------------------------------------------------------------------------------
+Merged Script
+
+import bpy
+import os
+from bpy.types import Operator
+from bpy.props import FloatProperty
+
+# ✅ Map file extensions to Blender add-ons and operators
+IMPORTERS = {
+    ".stl":  ("io_mesh_stl",   bpy.ops.import_mesh.stl),
+    ".fbx":  ("io_scene_fbx",  bpy.ops.import_scene.fbx),
+    ".obj":  ("io_scene_obj",  bpy.ops.import_scene.obj),
+    ".glb":  ("io_scene_gltf2", bpy.ops.import_scene.gltf),
+    ".gltf": ("io_scene_gltf2", bpy.ops.import_scene.gltf),
+}
+
+
+def ensure_addon_enabled(addon_name: str):
+    """Enable the required Blender add-on if it's not already enabled."""
+    if addon_name not in bpy.context.preferences.addons:
+        try:
+            bpy.ops.preferences.addon_enable(module=addon_name)
+            print(f"🔧 Enabled add-on: {addon_name}")
+        except Exception as e:
+            print(f"⚠️ Failed to enable add-on {addon_name}: {e}")
+
+
+def import_model(filepath):
+    """Import a model and return newly imported objects"""
+    ext = os.path.splitext(filepath)[1].lower()
+    if ext not in IMPORTERS:
+        print(f"❌ Unsupported File Format: {ext}")
+        return []
+
+    addon, operator = IMPORTERS[ext]
+
+    # ✅ ensure addon is enabled
+    ensure_addon_enabled(addon)
+
+    # Track before/after objects to detect new ones
+    before = set(bpy.data.objects)
+    operator(filepath=filepath)
+    after = set(bpy.data.objects)
+
+    new_objs = list(after - before)
+    return new_objs
+
+
+# --- Modal Operator ---
+class OBJECT_OT_MoveModelsModal(Operator):
+    bl_idname = "object.move_models_modal"
+    bl_label = "Move STL & Sketchfab Models with Keys"
+
+    step: FloatProperty(name="Move Step", default=0.2)
+    rot_step: FloatProperty(name="Rotate Step", default=0.1)  # radians
+    _timer = None
+    _keys_pressed = set()
+
+    def modal(self, context, event):
+        model1 = bpy.data.objects.get("Sketchfab_model")  # Sketchfab model
+        model2 = bpy.data.objects.get("Car_engine")       # STL model
+
+        if not (model1 and model2):
+            self.report({'ERROR'}, "Models not found (check names in Outliner).")
+            return {'CANCELLED'}
+
+        if event.type == 'ESC':
+            self.cancel(context)
+            return {'CANCELLED'}
+
+        # Track key press/release
+        if event.type in {'UP_ARROW', 'DOWN_ARROW', 'LEFT_ARROW', 'RIGHT_ARROW', 'PAGE_UP', 'PAGE_DOWN'}:
+            if event.value == 'PRESS':
+                self._keys_pressed.add(event.type)
+            elif event.value == 'RELEASE':
+                self._keys_pressed.discard(event.type)
+
+        # Apply actions on TIMER
+        if event.type == 'TIMER':
+            for key in list(self._keys_pressed):
+
+                # --- Ctrl+Shift = Move BOTH ---
+                if event.ctrl and event.shift:
+                    if key == 'UP_ARROW':
+                        model1.location.y += self.step
+                        model2.location.y += self.step
+                    elif key == 'DOWN_ARROW':
+                        model1.location.y -= self.step
+                        model2.location.y -= self.step
+                    elif key == 'LEFT_ARROW':
+                        model1.location.x -= self.step
+                        model2.location.x -= self.step
+                    elif key == 'RIGHT_ARROW':
+                        model1.location.x += self.step
+                        model2.location.x += self.step
+                    elif key == 'PAGE_UP':
+                        model1.location.z += self.step
+                        model2.location.z += self.step
+                    elif key == 'PAGE_DOWN':
+                        model1.location.z -= self.step
+                        model2.location.z -= self.step
+
+                # --- Ctrl only = Rotate STL ---
+                elif event.ctrl:
+                    if key == 'UP_ARROW':
+                        model2.rotation_euler.x += self.rot_step
+                    elif key == 'DOWN_ARROW':
+                        model2.rotation_euler.x -= self.rot_step
+                    elif key == 'LEFT_ARROW':
+                        model2.rotation_euler.z += self.rot_step
+                    elif key == 'RIGHT_ARROW':
+                        model2.rotation_euler.z -= self.rot_step
+                    elif key == 'PAGE_UP':
+                        model2.rotation_euler.y += self.rot_step
+                    elif key == 'PAGE_DOWN':
+                        model2.rotation_euler.y -= self.rot_step
+
+                # --- Shift only = Move Sketchfab model ---
+                elif event.shift:
+                    if key == 'UP_ARROW':
+                        model1.location.y += self.step
+                    elif key == 'DOWN_ARROW':
+                        model1.location.y -= self.step
+                    elif key == 'LEFT_ARROW':
+                        model1.location.x -= self.step
+                    elif key == 'RIGHT_ARROW':
+                        model1.location.x += self.step
+                    elif key == 'PAGE_UP':
+                        model1.location.z += self.step
+                    elif key == 'PAGE_DOWN':
+                        model1.location.z -= self.step
+
+                # --- No modifiers = Move STL ---
+                else:
+                    if key == 'UP_ARROW':
+                        model2.location.y += self.step
+                    elif key == 'DOWN_ARROW':
+                        model2.location.y -= self.step
+                    elif key == 'LEFT_ARROW':
+                        model2.location.x -= self.step
+                    elif key == 'RIGHT_ARROW':
+                        model2.location.x += self.step
+                    elif key == 'PAGE_UP':
+                        model2.location.z += self.step
+                    elif key == 'PAGE_DOWN':
+                        model2.location.z -= self.step
+
+        return {'RUNNING_MODAL'}
+
+    def invoke(self, context, event):
+        wm = context.window_manager
+        self._timer = wm.event_timer_add(0.1, window=context.window)
+        wm.modal_handler_add(self)
+        self._keys_pressed.clear()
+        self.report({'INFO'},
+                    "Arrows = STL | Shift+Arrows = Model1 | Ctrl+Arrows = Rotate STL | Shift+Ctrl+Arrows = Move Both")
+        return {'RUNNING_MODAL'}
+
+    def cancel(self, context):
+        wm = context.window_manager
+        if self._timer:
+            wm.event_timer_remove(self._timer)
+        self._keys_pressed.clear()
+
+
+def register():
+    bpy.utils.register_class(OBJECT_OT_MoveModelsModal)
+
+
+def unregister():
+    bpy.utils.unregister_class(OBJECT_OT_MoveModelsModal)
+
+
+# --- Run everything ---
+if __name__ == "__main__":
+    # Remove default cube
+    if "Cube" in bpy.data.objects:
+        bpy.data.objects.remove(bpy.data.objects["Cube"], do_unlink=True)
+
+    # Import first model (Sketchfab .gltf)
+    model1_path = r"C:/Users/Devaraj/Downloads/sharks_underwater/scene.gltf"
+    objs1 = import_model(model1_path)
+    if objs1:
+        objs1[0].name = "Sketchfab_model"
+
+    # Import second model (STL)
+    model2_path = r"C:/Users/Devaraj/Documents/ROV/car_engine_stl/Car engine.stl"
+    objs2 = import_model(model2_path)
+    if objs2:
+        objs2[0].name = "Car_engine"
+        objs2[0].location = (0, 5, 0)
+
+    # Register operator and start it
+    register()
+    bpy.ops.object.move_models_modal('INVOKE_DEFAULT')

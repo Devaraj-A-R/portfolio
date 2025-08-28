@@ -1,0 +1,296 @@
+import bpy
+from bpy.types import Operator
+from bpy.props import FloatProperty
+
+
+class OBJECT_OT_MoveCubeModal(Operator):
+    bl_idname = "object.move_cube_modal"
+    bl_label = "Move and Rotate Cube/Model with Keys"
+
+    step: FloatProperty(name="Move Step", default=0.2)
+    rot_step: FloatProperty(name="Rotate Step", default=0.1)  # radians (~5.7°)
+    _timer = None
+
+    # Track keys currently held
+    _keys_pressed = set()
+
+    def modal(self, context, event):
+        cube = bpy.data.objects.get("ControlledCube")
+        model = bpy.data.objects.get("Sketchfab_model")  # your GLTF object name
+
+        if not cube or not model:
+            self.report({'ERROR'}, "Required objects not found (ControlledCube / Sketchfab_model).")
+            return {'CANCELLED'}
+
+        # Exit
+        if event.type == 'ESC':
+            self.cancel(context)
+            return {'CANCELLED'}
+
+        # Track arrow/page keys pressed/released
+        if event.type in {'UP_ARROW', 'DOWN_ARROW', 'LEFT_ARROW', 'RIGHT_ARROW', 'PAGE_UP', 'PAGE_DOWN'}:
+            if event.value == 'PRESS':
+                # Save modifiers together with key
+                self._keys_pressed.add((event.type, event.shift, event.ctrl))
+            elif event.value == 'RELEASE':
+                # Remove regardless of modifiers (release sends only type)
+                self._keys_pressed = {k for k in self._keys_pressed if k[0] != event.type}
+
+        # Timer applies movement/rotation
+        if event.type == 'TIMER':
+            for key, shift, ctrl in list(self._keys_pressed):
+                if ctrl and shift:
+                    # ---- Shift+Ctrl+Arrows = Rotate both objects ----
+                    if key == 'UP_ARROW':
+                        cube.rotation_euler.x += self.rot_step
+                        model.rotation_euler.x += self.rot_step
+                    elif key == 'DOWN_ARROW':
+                        cube.rotation_euler.x -= self.rot_step
+                        model.rotation_euler.x -= self.rot_step
+                    elif key == 'LEFT_ARROW':
+                        cube.rotation_euler.z += self.rot_step
+                        model.rotation_euler.z += self.rot_step
+                    elif key == 'RIGHT_ARROW':
+                        cube.rotation_euler.z -= self.rot_step
+                        model.rotation_euler.z -= self.rot_step
+
+                elif ctrl:
+                    # ---- Ctrl+Arrows = Rotate cube only ----
+                    if key == 'UP_ARROW':
+                        cube.rotation_euler.x += self.rot_step
+                    elif key == 'DOWN_ARROW':
+                        cube.rotation_euler.x -= self.rot_step
+                    elif key == 'LEFT_ARROW':
+                        cube.rotation_euler.z += self.rot_step
+                    elif key == 'RIGHT_ARROW':
+                        cube.rotation_euler.z -= self.rot_step
+
+                elif shift:
+                    # ---- Shift+Arrows or Shift+PageUp/Down = Move model ----
+                    if key == 'UP_ARROW':
+                        model.location.y += self.step
+                    elif key == 'DOWN_ARROW':
+                        model.location.y -= self.step
+                    elif key == 'LEFT_ARROW':
+                        model.location.x -= self.step
+                    elif key == 'RIGHT_ARROW':
+                        model.location.x += self.step
+                    elif key == 'PAGE_UP':
+                        model.location.z += self.step
+                    elif key == 'PAGE_DOWN':
+                        model.location.z -= self.step
+
+                else:
+                    # ---- Plain Arrows or PageUp/Down = Move cube ----
+                    if key == 'UP_ARROW':
+                        cube.location.y += self.step
+                    elif key == 'DOWN_ARROW':
+                        cube.location.y -= self.step
+                    elif key == 'LEFT_ARROW':
+                        cube.location.x -= self.step
+                    elif key == 'RIGHT_ARROW':
+                        cube.location.x += self.step
+                    elif key == 'PAGE_UP':
+                        cube.location.z += self.step
+                    elif key == 'PAGE_DOWN':
+                        cube.location.z -= self.step
+
+        return {'RUNNING_MODAL'}
+
+    def invoke(self, context, event):
+        cube = bpy.data.objects.get("ControlledCube")
+        if not cube:
+            self.report({'ERROR'}, "No object named 'ControlledCube' found.")
+            return {'CANCELLED'}
+
+        wm = context.window_manager
+        self._timer = wm.event_timer_add(0.1, window=context.window)
+        wm.modal_handler_add(self)
+
+        self._keys_pressed.clear()
+
+        self.report({'INFO'},
+            "Arrows: move cube | Shift+Arrows: move Sketchfab_model | "
+            "PageUp/Down: Z move | Ctrl+Arrows: rotate cube | "
+            "Shift+Ctrl+Arrows: rotate BOTH | ESC to stop"
+        )
+        return {'RUNNING_MODAL'}
+
+    def cancel(self, context):
+        wm = context.window_manager
+        if self._timer:
+            wm.event_timer_remove(self._timer)
+        self._keys_pressed.clear()
+
+
+def register():
+    bpy.utils.register_class(OBJECT_OT_MoveCubeModal)
+
+
+def unregister():
+    bpy.utils.unregister_class(OBJECT_OT_MoveCubeModal)
+
+
+if __name__ == "__main__":
+    register()
+    bpy.ops.object.move_cube_modal('INVOKE_DEFAULT')
+
+
+
+
+
+______________________________________________________________________________________________________________________________________
+
+
+
+
+
+
+
+
+import bpy
+from bpy.types import Operator
+from bpy.props import FloatProperty
+
+
+class OBJECT_OT_MoveCubeModal(Operator):
+    bl_idname = "object.move_cube_modal"
+    bl_label = "Move and Rotate Cube/Model with Keys"
+
+    step: FloatProperty(name="Move Step", default=0.2)
+    rot_step: FloatProperty(name="Rotate Step", default=0.1)  # radians (~5.7°)
+    _timer = None
+
+    # Track keys currently held
+    _keys_pressed = set()
+
+    def modal(self, context, event):
+        cube = bpy.data.objects.get("ControlledCube")
+        model = bpy.data.objects.get("Sketchfab_model")  # your GLTF object name
+
+        if not cube or not model:
+            self.report({'ERROR'}, "Required objects not found (ControlledCube / Sketchfab_model).")
+            return {'CANCELLED'}
+
+        # Exit
+        if event.type == 'ESC':
+            self.cancel(context)
+            return {'CANCELLED'}
+
+        # Track arrow/page keys pressed/released
+        if event.type in {'UP_ARROW', 'DOWN_ARROW', 'LEFT_ARROW', 'RIGHT_ARROW', 'PAGE_UP', 'PAGE_DOWN'}:
+            if event.value == 'PRESS':
+                # Save modifiers together with key
+                self._keys_pressed.add((event.type, event.shift, event.ctrl))
+            elif event.value == 'RELEASE':
+                # Remove regardless of modifiers (release sends only type)
+                self._keys_pressed = {k for k in self._keys_pressed if k[0] != event.type}
+
+        # Timer applies movement/rotation
+        if event.type == 'TIMER':
+            for key, shift, ctrl in list(self._keys_pressed):
+                if ctrl and shift:
+                    # ---- Shift+Ctrl+Arrows = Rotate both objects ----
+                    if key == 'UP_ARROW':
+                        cube.rotation_euler.x += self.rot_step
+                        model.rotation_euler.x += self.rot_step
+                    elif key == 'DOWN_ARROW':
+                        cube.rotation_euler.x -= self.rot_step
+                        model.rotation_euler.x -= self.rot_step
+                    elif key == 'LEFT_ARROW':
+                        cube.rotation_euler.z += self.rot_step
+                        model.rotation_euler.z += self.rot_step
+                    elif key == 'RIGHT_ARROW':
+                        cube.rotation_euler.z -= self.rot_step
+                        model.rotation_euler.z -= self.rot_step
+
+                elif ctrl:
+                    # ---- Ctrl+Arrows = Rotate cube only ----
+                    if key == 'UP_ARROW':
+                        cube.rotation_euler.x += self.rot_step
+                    elif key == 'DOWN_ARROW':
+                        cube.rotation_euler.x -= self.rot_step
+                    elif key == 'LEFT_ARROW':
+                        cube.rotation_euler.z += self.rot_step
+                    elif key == 'RIGHT_ARROW':
+                        cube.rotation_euler.z -= self.rot_step
+
+                elif shift:
+                    # ---- Shift+Arrows or Shift+PageUp/Down = Move model ----
+                    if key == 'UP_ARROW':
+                        model.location.y += self.step
+                    elif key == 'DOWN_ARROW':
+                        model.location.y -= self.step
+                    elif key == 'LEFT_ARROW':
+                        model.location.x -= self.step
+                    elif key == 'RIGHT_ARROW':
+                        model.location.x += self.step
+                    elif key == 'PAGE_UP':
+                        model.location.z += self.step
+                    elif key == 'PAGE_DOWN':
+                        model.location.z -= self.step
+
+                else:
+                    # ---- Plain Arrows or PageUp/Down = Move cube ----
+                    if key == 'UP_ARROW':
+                        cube.location.y += self.step
+                    elif key == 'DOWN_ARROW':
+                        cube.location.y -= self.step
+                    elif key == 'LEFT_ARROW':
+                        cube.location.x -= self.step
+                    elif key == 'RIGHT_ARROW':
+                        cube.location.x += self.step
+                    elif key == 'PAGE_UP':
+                        cube.location.z += self.step
+                    elif key == 'PAGE_DOWN':
+                        cube.location.z -= self.step
+
+        return {'RUNNING_MODAL'}
+
+    def invoke(self, context, event):
+        cube = bpy.data.objects.get("ControlledCube")
+        if not cube:
+            self.report({'ERROR'}, "No object named 'ControlledCube' found.")
+            return {'CANCELLED'}
+
+        wm = context.window_manager
+        self._timer = wm.event_timer_add(0.1, window=context.window)
+        wm.modal_handler_add(self)
+
+        self._keys_pressed.clear()
+
+        self.report({'INFO'},
+            "Arrows: move cube | Shift+Arrows: move Sketchfab_model | "
+            "PageUp/Down: Z move | Ctrl+Arrows: rotate cube | "
+            "Shift+Ctrl+Arrows: rotate BOTH | ESC to stop"
+        )
+        return {'RUNNING_MODAL'}
+
+    def cancel(self, context):
+        wm = context.window_manager
+        if self._timer:
+            wm.event_timer_remove(self._timer)
+        self._keys_pressed.clear()
+
+
+def register():
+    bpy.utils.register_class(OBJECT_OT_MoveCubeModal)
+
+
+def unregister():
+    bpy.utils.unregister_class(OBJECT_OT_MoveCubeModal)
+
+
+if __name__ == "__main__":
+    register()
+    bpy.ops.object.move_cube_modal('INVOKE_DEFAULT')
+----------------------------------------------------------------------------------------------------------------------------------
+
+
+This Blender Python script creates a modal operator that lets you move and rotate two objects in the scene – one called "ControlledCube" and the other called "Sketchfab_model" – using the keyboard. At the top, it imports bpy (Blender’s API), Operator (so we can make a custom tool), and FloatProperty (to define adjustable numbers). Inside the operator class OBJECT_OT_MoveCubeModal, two properties are created: step (default 0.2) which controls how far objects move with each key press, and rot_step (default 0.1 radians, about 5.7°) which controls rotation amount. The operator also sets up _keys_pressed (a set) to keep track of keys currently held down, and _timer (a repeating event so the script can check inputs continuously).
+
+The heart of the script is the modal() function, which runs while the operator is active. First, it looks for the objects "ControlledCube" and "Sketchfab_model". If either is missing, the operator stops with an error. If the user presses ESC, the operator exits. Otherwise, whenever arrow or PageUp/PageDown keys are pressed or released, the script updates the _keys_pressed set so it always knows which keys are down. On every timer tick (event.type == 'TIMER'), the operator looks at _keys_pressed and performs actions: if both Shift and Ctrl are held, the arrow keys rotate both the cube and the model together; if only Ctrl is held, the cube rotates by itself; if only Shift is held, the model moves; if no modifiers are held, the cube moves. The movement is in X/Y directions with arrow keys, Z with PageUp/PageDown, and the rotations affect X or Z axes depending on the arrow key.
+
+The invoke() function runs when the operator is first started. It checks that "ControlledCube" exists, adds a repeating timer (0.1 second interval), clears any previously tracked keys, and prints a short help message about the controls. The cancel() function removes the timer and clears the key set when the operator ends. At the bottom, register() and unregister() functions make Blender aware of this new operator. Finally, the script registers the operator and immediately starts it with bpy.ops.object.move_cube_modal('INVOKE_DEFAULT').
+
+In short, the script turns Blender into an interactive controller: Arrow keys move the cube, PageUp/PageDown move it up or down, Shift+keys move the model, Ctrl+keys rotate the cube, Shift+Ctrl+keys rotate both objects, and ESC stops the tool.
